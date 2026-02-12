@@ -1,84 +1,121 @@
-/* RESET E BASE */
+/* ============================================================
+   ACTION: RESET E BLINDAGEM CONTRA CURSOR
+   Garante que o dashboard pareça um app e não um texto.
+   ============================================================ */
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    
+    /* Impede a seleção de texto e imagens */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+    /* Deixa o cursor de digitação invisível em qualquer situação */
+    caret-color: transparent !important;
+    
+    /* Remove contornos de foco azulados ao clicar */
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background: linear-gradient(135deg, #0f172a, #1e293b);
-  color: white;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    color: white;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    /* Força o mouse a ser sempre a seta padrão (ponteiro) */
+    cursor: default !important;
 }
 
-/* ==========================================
-   AJUSTE MANUAL DO LOGO SUPERIOR AQUI 
-   ========================================== */
+/* ============================================================
+   ACTION: LOGO SUPERIOR
+   ============================================================ */
 .logo-topo {
-  height: 200px;        /* Aumente ou diminua este valor (ex: 100px, 120px) */
-  margin-bottom: 20px; /* Espaço entre o logo e o título */
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-  transition: transform 0.3s;
+    height: 200px; 
+    margin-bottom: 20px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    transition: transform 0.3s;
+    /* Faz o clique passar direto pelo logo */
+    pointer-events: none; 
 }
 
 /* HEADER */
 header {
-  text-align: center;
-  padding: 40px 20px;
+    text-align: center;
+    padding: 40px 20px;
 }
 
 header h1 {
-  font-size: 28px;
-  margin-bottom: 10px;
+    font-size: 28px;
+    margin-bottom: 10px;
 }
 
 #mesAtualTexto {
-  color: #94a3b8;
-  font-weight: bold;
+    color: #94a3b8;
+    font-weight: bold;
+    text-transform: capitalize;
 }
 
-/* DASHBOARD GRID */
+/* ============================================================
+   ACTION: DASHBOARD GRID
+   ============================================================ */
 .dashboard {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 25px;
-  padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-  flex: 1; /* Faz a grid empurrar o footer para o fim da tela */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    flex: 1;
 }
 
-/* CARDS MÊS */
+/* ============================================================
+   ACTION: ESTILO DOS CARDS (MESES)
+   ============================================================ */
 .card {
-  background: #1e293b;
-  padding: 30px;
-  border-radius: 14px;
-  text-align: center;
-  cursor: pointer;
-  transition: .3s;
-  position: relative;
-  border: 1px solid rgba(255,255,255,0.05);
+    background: #1e293b;
+    padding: 30px;
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer !important;
+    transition: .3s;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.05);
 }
 
 .card:hover {
-  transform: translateY(-6px) scale(1.03);
-  background: #263349;
+    transform: translateY(-6px) scale(1.03);
+    background: #263349;
+}
+
+/* ESTILO PARA MESES FUTUROS (BLOQUEADOS) */
+.card.bloqueado {
+    opacity: 0.6;
+    cursor: not-allowed !important;
+    filter: grayscale(0.5);
+}
+
+.card.bloqueado:hover {
+    transform: none;
 }
 
 .card h2 {
-  margin-bottom: 15px;
+    margin-bottom: 15px;
 }
 
 .status {
-  padding: 6px 14px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: bold;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: bold;
+    display: inline-block;
 }
 
 /* STATUS CORES */
@@ -86,129 +123,164 @@ header h1 {
 .concluida .status { background: #3b82f6; }
 
 .andamento { 
-  border-left: 6px solid #22c55e; 
-  animation: pulse 1.8s infinite; 
+    border-left: 6px solid #22c55e; 
+    animation: pulse 1.8s infinite; 
 }
 .andamento .status { background: #22c55e; }
 
-.pendente { border-left: 6px solid #facc15; }
-.pendente .status { background: #facc15; color: #000; }
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
-  70% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+.pendente { border-left: 6px solid #64748b; }
+.pendente .status { 
+    background: #334155; 
+    color: #94a3b8; 
+    font-size: 11px;
 }
 
-/* MODAL E RECURSOS */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+    70% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+}
+
+/* ============================================================
+   ACTION: MODAL E RECURSOS
+   ============================================================ */
 .modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(5px);
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
 }
 
 .modal-content {
-  background: #1e293b;
-  width: 90%;
-  max-width: 1100px;
-  max-height: 90vh;
-  overflow-y: auto;
-  border-radius: 16px;
-  padding: 40px;
-  position: relative;
+    background: #1e293b;
+    width: 90%;
+    max-width: 1100px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 40px;
+    position: relative;
+    cursor: default;
 }
 
 .btn-fechar {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ef4444, #b91c1c);
-  color: white;
-  cursor: pointer;
-  transition: .3s;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: white;
+    cursor: pointer !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .resumo-box {
-  background: #334155;
-  padding: 20px;
-  border-radius: 12px;
-  margin-bottom: 30px;
-  border-left: 4px solid #3b82f6;
+    background: #334155;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border-left: 4px solid #3b82f6;
 }
 
-/* GRID DE RECURSOS (DENTRO DO MODAL) */
 .recursos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
 }
 
 .card-recurso {
-  background: #0f172a;
-  padding: 15px;
-  border-radius: 12px;
-  text-align: center;
-  border: 1px solid rgba(255,255,255,0.1);
-}
-
-.card-recurso h4 {
-  margin-bottom: 10px;
-  font-size: 14px;
-  color: #94a3b8;
+    background: #0f172a;
+    padding: 15px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .card-recurso img {
-  width: 100%;
-  height: 250px;
-  object-fit: cover;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: .3s;
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer !important;
+    transition: .3s;
 }
 
-/* FOOTER CENTRALIZADO (JCA) */
+/* ============================================================
+   ACTION: FOOTER (GRUPO JCA E EMPRESAS)
+   ============================================================ */
 footer {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 50px 0;
-  margin-top: auto;
+    width: 100%;
+    display: flex;
+    flex-direction: column; /* JCA em cima, Empresas embaixo */
+    justify-content: center;
+    align-items: center;
+    padding: 60px 20px;
+    margin-top: auto;
+    background: rgba(0, 0, 0, 0.15);
 }
 
 .logo-footer {
-  max-width: 180px;
-  height: auto;
-  opacity: 0.8;
-  transition: 0.3s;
+    max-width: 180px;
+    height: auto;
+    opacity: 0.9;
+    pointer-events: none;
+    margin-bottom: 35px; /* Espaço para a linha de baixo */
 }
 
-.logo-footer:hover {
-  opacity: 1;
+.logos-empresas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
 }
 
-/* ZOOM */
+.logo-item {
+    height: 35px; /* Alinha todas com a mesma altura */
+    width: auto;
+    opacity: 0.8;
+    pointer-events: none;
+    filter: brightness(1.1);
+
+}
+
+.logo-catarinense{
+    display: flex;
+    height: 30px;
+    width: 185px;
+}
+
+.logo-expresso{
+        display: flex;
+    height: 60px;
+    width: 185px;
+}
+
+/* ============================================================
+   ACTION: ZOOM DA IMAGEM
+   ============================================================ */
 .modal-zoom {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.95);
-  justify-content: center;
-  align-items: center;
-  z-index: 2000;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    cursor: zoom-out !important;
 }
 
 .modal-zoom img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 12px;
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 12px;
 }

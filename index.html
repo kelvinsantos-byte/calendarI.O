@@ -3,14 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Campanhas de Segurança</title>
+    <title>Calendário Campanhas de Segurança</title>
 
     <style>
-        /* RESET */
+        /* RESET E BLINDAGEM CONTRA CURSOR */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            caret-color: transparent;
+            outline: none !important;
+            -webkit-tap-highlight-color: transparent;
         }
 
         body {
@@ -20,18 +27,23 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            cursor: default !important;
+        }
+
+        /* AJUSTE LOGO SUPERIOR */
+        .logo-topo {
+            height: 200px; 
+            margin-bottom: 20px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            pointer-events: none;
         }
 
         /* HEADER */
         header {
             text-align: center;
             padding: 40px 20px;
-        }
-
-        .logo-topo {
-            height: 60px; 
-            margin-bottom: 20px;
-            object-fit: contain;
         }
 
         header h1 {
@@ -45,7 +57,7 @@
             text-transform: capitalize;
         }
 
-        /* DASHBOARD */
+        /* DASHBOARD GRID */
         .dashboard {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -53,18 +65,19 @@
             padding: 40px;
             max-width: 1200px;
             margin: 0 auto;
-            flex-grow: 1; /* Faz a grid ocupar o espaço disponível */
+            flex: 1;
         }
 
+        /* CARDS MÊS */
         .card {
             background: #1e293b;
             padding: 30px;
             border-radius: 14px;
             text-align: center;
-            cursor: pointer;
+            cursor: pointer !important;
             transition: .3s;
-            border: 1px solid rgba(255,255,255,0.05);
             position: relative;
+            border: 1px solid rgba(255,255,255,0.05);
         }
 
         .card:hover {
@@ -72,9 +85,18 @@
             background: #263349;
         }
 
+        .card.bloqueado {
+            opacity: 0.6;
+            cursor: not-allowed !important;
+            filter: grayscale(0.5);
+        }
+
+        .card.bloqueado:hover {
+            transform: none;
+        }
+
         .card h2 {
             margin-bottom: 15px;
-            font-size: 1.2rem;
         }
 
         .status {
@@ -85,7 +107,7 @@
             display: inline-block;
         }
 
-        /* CORES DE STATUS */
+        /* STATUS CORES */
         .concluida { border-left: 6px solid #3b82f6; }
         .concluida .status { background: #3b82f6; }
 
@@ -95,8 +117,12 @@
         }
         .andamento .status { background: #22c55e; }
 
-        .pendente { border-left: 6px solid #facc15; }
-        .pendente .status { background: #facc15; color: #000; }
+        .pendente { border-left: 6px solid #64748b; }
+        .pendente .status { 
+            background: #334155; 
+            color: #94a3b8; 
+            font-size: 11px;
+        }
 
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
@@ -104,23 +130,45 @@
             100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
         }
 
-        /* FOOTER CENTRALIZADO */
+        /* ==========================================
+           ACTION: AJUSTE DO RODAPÉ (LOGOS JCA)
+           ========================================== */
         footer {
             width: 100%;
             display: flex;
+            flex-direction: column; /* Organiza logo JCA em cima e empresas embaixo */
             justify-content: center;
             align-items: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
             margin-top: auto;
+            background: rgba(0,0,0,0.2); /* Sutil destaque no fundo */
         }
 
         .logo-footer {
-            max-width: 180px;
+            max-width: 160px;
             height: auto;
             opacity: 0.9;
+            pointer-events: none;
+            margin-bottom: 25px; /* Espaço entre o logo JCA e as empresas */
         }
 
-        /* MODAL CAMPANHA */
+        .logos-empresas {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 30px; /* Espaçamento entre as logos das empresas */
+        }
+
+        .logo-item {
+            height: 35px; /* ACTION: Ajuste aqui para aumentar/diminuir todas juntas */
+            width: auto;
+            opacity: 0.8;
+            pointer-events: none;
+            filter: brightness(1.2); /* Melhora visual no fundo escuro */
+        }
+
+        /* MODAL */
         .modal {
             display: none;
             position: fixed;
@@ -130,19 +178,17 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            padding: 20px;
         }
 
         .modal-content {
             background: #1e293b;
-            width: 100%;
+            width: 90%;
             max-width: 1100px;
             max-height: 90vh;
             overflow-y: auto;
             border-radius: 16px;
             padding: 40px;
             position: relative;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
 
         .btn-fechar {
@@ -155,15 +201,11 @@
             border-radius: 50%;
             background: linear-gradient(135deg, #ef4444, #b91c1c);
             color: white;
-            font-size: 18px;
-            cursor: pointer;
-            transition: .3s;
+            cursor: pointer !important;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
-        .btn-fechar:hover { transform: rotate(90deg) scale(1.1); }
 
         .resumo-box {
             background: #334155;
@@ -187,95 +229,80 @@
             border: 1px solid rgba(255,255,255,0.1);
         }
 
-        .card-recurso h4 {
-            margin-bottom: 12px;
-            font-size: 14px;
-            color: #94a3b8;
-            text-transform: uppercase;
-        }
-
         .card-recurso img {
             width: 100%;
             height: 250px;
             object-fit: cover;
             border-radius: 8px;
-            cursor: pointer;
-            transition: .3s;
+            cursor: pointer !important;
         }
 
-        .card-recurso img:hover { transform: scale(1.03); }
-
-        .nao-utilizado {
-            color: #f87171;
-            grid-column: 1 / -1;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* ZOOM */
         .modal-zoom {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.95);
+            background: rgba(0,0,0,0.95);
             justify-content: center;
             align-items: center;
             z-index: 2000;
+            cursor: zoom-out !important;
         }
 
         .modal-zoom img {
-            max-width: 95%;
-            max-height: 95%;
-            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 12px;
         }
     </style>
+
+    <link rel="stylesheet" href="estilo.css">
 </head>
 
 <body>
 
 <header>
     <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770865209/Intelig%C3%AAncia_vertical_branco_eqljpf.png" class="logo-topo" alt="Logo Inteligência">
-    <h1>Dashboard de Campanhas de Segurança</h1>
+    <h1>Calendário de Campanhas de Segurança </h1>
     <p id="mesAtualTexto"></p>
 </header>
 
 <section class="dashboard">
-    <div class="card" data-month="0" onclick="abrirCampanha('JANEIRO')">
+    <div class="card" data-month="0" data-data="01/01/2026" onclick="abrirCampanha('JANEIRO', this)">
         <h2>JANEIRO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="1" onclick="abrirCampanha('FEVEREIRO')">
+    <div class="card" data-month="1" data-data="01/02/2026" onclick="abrirCampanha('FEVEREIRO', this)">
         <h2>FEVEREIRO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="2" onclick="abrirCampanha('MARÇO')">
+    <div class="card" data-month="2" data-data="03/03/2026" onclick="abrirCampanha('MARÇO', this)">
         <h2>MARÇO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="3" onclick="abrirCampanha('ABRIL')">
+    <div class="card" data-month="3" data-data="01/04/2026" onclick="abrirCampanha('ABRIL', this)">
         <h2>ABRIL</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="4" onclick="abrirCampanha('MAIO')">
+    <div class="card" data-month="4" data-data="01/05/2026" onclick="abrirCampanha('MAIO', this)">
         <h2>MAIO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="6" onclick="abrirCampanha('JULHO')">
+    <div class="card" data-month="6" data-data="01/07/2026" onclick="abrirCampanha('JULHO', this)">
         <h2>JULHO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="8" onclick="abrirCampanha('SETEMBRO')">
+    <div class="card" data-month="8" data-data="01/09/2026" onclick="abrirCampanha('SETEMBRO', this)">
         <h2>SETEMBRO</h2>
         <span class="status"></span>
     </div>
 
-    <div class="card" data-month="11" onclick="abrirCampanha('DEZEMBRO')">
+    <div class="card" data-month="11" data-data="15/11/2026" onclick="abrirCampanha('DEZEMBRO', this)">
         <h2>DEZEMBRO</h2>
         <span class="status"></span>
     </div>
@@ -283,18 +310,24 @@
 
 <footer>
     <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770865291/GRUPOJCA_branco_r0nvw0.png" alt="Logo Grupo JCA" class="logo-footer">
+    
+    <div class="logos-empresas">
+        <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770901958/1001_qisjtr.png" alt="1001" class="logo-item">
+        <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770901966/Catarinense_BrancoHD_nodz19.png" alt="Catarinense" class="logo-catarinense">
+        <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770901986/Cometa_brancoHD_x09jcs.png" alt="Cometa" class="logo-item">
+        <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770902190/EXP_Branco2_f6sov0.png" alt="Expresso do Sul" class="logo-expresso">
+        <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770902068/RRP_np50b0.png" alt="Rápido Ribeirão" class="logo-item">
+    </div>
 </footer>
 
 <div id="modalCampanha" class="modal">
     <div class="modal-content">
         <button class="btn-fechar" onclick="fecharCampanha()">✕</button>
         <h2 id="tituloCampanha" style="margin-bottom: 20px; color: #3b82f6;"></h2>
-        
         <div class="resumo-box">
             <h3 style="margin-bottom: 10px; font-size: 16px;">Resumo da Campanha</h3>
             <p id="resumoCampanha"></p>
         </div>
-
         <div class="recursos-grid" id="recursosGrid"></div>
     </div>
 </div>
@@ -307,32 +340,34 @@
 const campanhas = {
     JANEIRO: {
         titulo: "Motorista Premium 2026",
-        resumo: "Foco na valorização dos motoristas com melhores indicadores de segurança e performance rodoviária.",
+        resumo: "O mês de janeiro marcou o início de um novo ciclo para o Programa Motorista Premium 2026. Esta campanha teve como objetivo apresentar, de forma clara e transparente, as premissas que nortearão o programa ao longo do ano, reforçando o compromisso do Grupo JCA com a excelência operacional, a segurança no trânsito e o reconhecimento dos profissionais que se destacam pelo cumprimento das normas e boas práticas de condução. O Programa Motorista Premium não se resume a uma premiação. Ele representa um modelo de valorização baseado em responsabilidade, disciplina operacional e cultura de segurança. Ao longo de 2026, os motoristas serão avaliados mensalmente quanto ao cumprimento das orientações de integração, regras internas, participação nos treinamentos e condução segura aliada ao uso adequado das tecnologias embarcadas.",
         folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859334/Folder.MotoristaPremiumRodoviario-26_page-0001_lvupzo.jpg",
         folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859755/Folder.MotoristaPremiumRodoviario-26_page-0002_c1h9ft.jpg",
         banner: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859566/FOLDER_URBANO_page-0001_e6roct.jpg"
     },
     FEVEREIRO: {
-        titulo: "Carnaval com Segurança",
-        resumo: "Campanha preventiva sobre os perigos da combinação álcool e direção durante as festividades.",
+        titulo: "Olhos na Via. Mãos no Volante. Segurança em Primeiro Lugar.",
+        resumo: "A campanha teve como objetivo conscientizar os motoristas sobre os riscos da distração durante a condução, com ênfase na proibição do uso de celular ao volante. A iniciativa reforçou que a distração pode ocorrer de forma manual, visual e cognitiva, comprometendo diretamente o tempo de reação, a capacidade de percepção de riscos e a segurança na via. Com base em estudos e dados técnicos apresentados no roteiro, foi destacado que o uso do celular reduz significativamente a capacidade de resposta do condutor, podendo gerar prejuízos cognitivos semelhantes aos efeitos do álcool, além de provocar o fenômeno da “cegueira por desatenção”, quando o motorista olha para a via, mas não processa as informações ao redor. O principal objetivo da campanha foi fortalecer a cultura de atenção plena na condução, deixando claro que não existe uso seguro do celular ao volante e que a segurança começa com uma escolha consciente: manter os olhos na via, as mãos no volante e a vida como prioridade. A campanha reforça que dirigir exige presença total e responsabilidade com todos que compartilham o trânsito..",
         folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859828/Folder.AltaTemporada-Fev26_page-0001_bedf5f.jpg",
         folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859832/Folder.AltaTemporada-Fev26_page-0002_d1rorw.jpg",
         banner: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859657/Folder.AltaTemporada-Fev26_page-0001_spbe0s.jpg"
     },
     MARÇO: { 
-        titulo: "Segurança em Pauta", 
-        resumo: "Materiais de revisão e conscientização contínua.", 
+        titulo: "Cuidar é conduzir com segurança e Responsabilidade", 
+        resumo: "A campanha de março teve como objetivo conscientizar os motoristas sobre os riscos do uso de celular durante a condução, reforçando que essa prática pode aumentar em até 400% o risco de acidentes. Foi destacado que não existe uso seguro do celular ao volante, nem mesmo em engarrafamentos ou semáforos, pois a atenção não é retomada de forma imediata após a distração. A campanha também reforçou o respaldo legal previsto no Art. 252 do CTB, que proíbe o uso do celular durante a condução, e reafirmou a diretriz do Grupo JCA: o uso de celular ao volante é expressamente proibido. O objetivo central foi fortalecer a cultura de responsabilidade, presença e foco total na direção, priorizando sempre a vida.", 
         folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770860071/FOLDER_rev1_page-0001_xixvea.jpg", 
         folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770860083/FOLDER_rev1_page-0002_klmmgk.jpg" 
     },
-    ABRIL: { titulo: "Acuidade Visual", resumo: "", folderFrente: "" },
+    ABRIL: { titulo: "", resumo: "", folderFrente: "" },
     MAIO: { titulo: "", resumo: "", folderFrente: "" },
     JULHO: { titulo: "", resumo: "", folderFrente: "" },
     SETEMBRO: { titulo: "", resumo: "", folderFrente: "" },
     DEZEMBRO: { titulo: "", resumo: "", folderFrente: "" }
 };
 
-function abrirCampanha(mes) {
+function abrirCampanha(mes, elemento) {
+    if (elemento.classList.contains('bloqueado')) return;
+
     const dados = campanhas[mes];
     const grid = document.getElementById("recursosGrid");
     
@@ -340,7 +375,6 @@ function abrirCampanha(mes) {
     document.getElementById("resumoCampanha").innerText = dados.resumo || "Resumo não informado para esta campanha.";
     
     grid.innerHTML = "";
-
     const tiposRecursos = [
         { chave: 'folderFrente', nome: 'Folder Frente' },
         { chave: 'folderVerso', nome: 'Folder Verso' },
@@ -349,12 +383,9 @@ function abrirCampanha(mes) {
         { chave: 'faixa', nome: 'Faixa de Pátio' }
     ];
 
-    let temRecurso = false;
-
     tiposRecursos.forEach(item => {
         const url = dados[item.chave];
         if (url && url.trim() !== "") {
-            temRecurso = true;
             grid.innerHTML += `
                 <div class="card-recurso">
                     <h4>${item.nome}</h4>
@@ -362,10 +393,6 @@ function abrirCampanha(mes) {
                 </div>`;
         }
     });
-
-    if (!temRecurso) {
-        grid.innerHTML = `<p class="nao-utilizado">⚠️ Nenhum material visual cadastrado para ${mes}.</p>`;
-    }
 
     document.getElementById("modalCampanha").style.display = "flex";
 }
@@ -383,7 +410,6 @@ function fecharZoom() {
     document.getElementById("modalZoom").style.display = "none";
 }
 
-// Lógica de Status
 const mesAtualIdx = new Date().getMonth();
 const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
@@ -391,6 +417,7 @@ document.getElementById("mesAtualTexto").innerText = "Mês Atual: " + nomesMeses
 
 document.querySelectorAll(".card").forEach(card => {
     const mesCard = parseInt(card.getAttribute("data-month"));
+    const dataInicio = card.getAttribute("data-data");
     const statusLabel = card.querySelector(".status");
 
     if (mesCard === mesAtualIdx) {
@@ -400,8 +427,8 @@ document.querySelectorAll(".card").forEach(card => {
         card.classList.add("concluida");
         statusLabel.innerText = "Concluída";
     } else {
-        card.classList.add("pendente");
-        statusLabel.innerText = "Pendente";
+        card.classList.add("pendente", "bloqueado");
+        statusLabel.innerHTML = `🔒 Esta campanha iniciará em: ${dataInicio}`;
     }
 });
 
@@ -411,5 +438,4 @@ window.onclick = function(event) {
 </script>
 
 </body>
-
 </html>
