@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Campanhas de Segurança</title>
+
+    <style>
+        /* RESET */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* HEADER */
+        header {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo-topo {
+            height: 60px; 
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        #mesAtualTexto {
+            color: #94a3b8;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        /* DASHBOARD */
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex-grow: 1; /* Faz a grid ocupar o espaço disponível */
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: .3s;
+            border: 1px solid rgba(255,255,255,0.05);
+            position: relative;
+        }
+
+        .card:hover {
+            transform: translateY(-6px) scale(1.03);
+            background: #263349;
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .status {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        /* CORES DE STATUS */
+        .concluida { border-left: 6px solid #3b82f6; }
+        .concluida .status { background: #3b82f6; }
+
+        .andamento { 
+            border-left: 6px solid #22c55e; 
+            animation: pulse 1.8s infinite; 
+        }
+        .andamento .status { background: #22c55e; }
+
+        .pendente { border-left: 6px solid #facc15; }
+        .pendente .status { background: #facc15; color: #000; }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 12px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* FOOTER CENTRALIZADO */
+        footer {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 20px;
+            margin-top: auto;
+        }
+
+        .logo-footer {
+            max-width: 180px;
+            height: auto;
+            opacity: 0.9;
+        }
+
+        /* MODAL CAMPANHA */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #1e293b;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 16px;
+            padding: 40px;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .btn-fechar {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ef4444, #b91c1c);
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            transition: .3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-fechar:hover { transform: rotate(90deg) scale(1.1); }
+
+        .resumo-box {
+            background: #334155;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .recursos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card-recurso {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .card-recurso h4 {
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #94a3b8;
+            text-transform: uppercase;
+        }
+
+        .card-recurso img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: .3s;
+        }
+
+        .card-recurso img:hover { transform: scale(1.03); }
+
+        .nao-utilizado {
+            color: #f87171;
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* ZOOM */
+        .modal-zoom {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .modal-zoom img {
+            max-width: 95%;
+            max-height: 95%;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770865209/Intelig%C3%AAncia_vertical_branco_eqljpf.png" class="logo-topo" alt="Logo Inteligência">
+    <h1>Dashboard de Campanhas de Segurança</h1>
+    <p id="mesAtualTexto"></p>
+</header>
+
+<section class="dashboard">
+    <div class="card" data-month="0" onclick="abrirCampanha('JANEIRO')">
+        <h2>JANEIRO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="1" onclick="abrirCampanha('FEVEREIRO')">
+        <h2>FEVEREIRO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="2" onclick="abrirCampanha('MARÇO')">
+        <h2>MARÇO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="3" onclick="abrirCampanha('ABRIL')">
+        <h2>ABRIL</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="4" onclick="abrirCampanha('MAIO')">
+        <h2>MAIO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="6" onclick="abrirCampanha('JULHO')">
+        <h2>JULHO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="8" onclick="abrirCampanha('SETEMBRO')">
+        <h2>SETEMBRO</h2>
+        <span class="status"></span>
+    </div>
+
+    <div class="card" data-month="11" onclick="abrirCampanha('DEZEMBRO')">
+        <h2>DEZEMBRO</h2>
+        <span class="status"></span>
+    </div>
+</section>
+
+<footer>
+    <img src="https://res.cloudinary.com/dxnruvmgu/image/upload/v1770865291/GRUPOJCA_branco_r0nvw0.png" alt="Logo Grupo JCA" class="logo-footer">
+</footer>
+
+<div id="modalCampanha" class="modal">
+    <div class="modal-content">
+        <button class="btn-fechar" onclick="fecharCampanha()">✕</button>
+        <h2 id="tituloCampanha" style="margin-bottom: 20px; color: #3b82f6;"></h2>
+        
+        <div class="resumo-box">
+            <h3 style="margin-bottom: 10px; font-size: 16px;">Resumo da Campanha</h3>
+            <p id="resumoCampanha"></p>
+        </div>
+
+        <div class="recursos-grid" id="recursosGrid"></div>
+    </div>
+</div>
+
+<div id="modalZoom" class="modal-zoom" onclick="fecharZoom()">
+    <img id="imagemZoom" src="" alt="Zoom">
+</div>
+
+<script>
+const campanhas = {
+    JANEIRO: {
+        titulo: "Motorista Premium 2026",
+        resumo: "Foco na valorização dos motoristas com melhores indicadores de segurança e performance rodoviária.",
+        folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859334/Folder.MotoristaPremiumRodoviario-26_page-0001_lvupzo.jpg",
+        folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859755/Folder.MotoristaPremiumRodoviario-26_page-0002_c1h9ft.jpg",
+        banner: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859566/FOLDER_URBANO_page-0001_e6roct.jpg"
+    },
+    FEVEREIRO: {
+        titulo: "Carnaval com Segurança",
+        resumo: "Campanha preventiva sobre os perigos da combinação álcool e direção durante as festividades.",
+        folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859828/Folder.AltaTemporada-Fev26_page-0001_bedf5f.jpg",
+        folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859832/Folder.AltaTemporada-Fev26_page-0002_d1rorw.jpg",
+        banner: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770859657/Folder.AltaTemporada-Fev26_page-0001_spbe0s.jpg"
+    },
+    MARÇO: { 
+        titulo: "Segurança em Pauta", 
+        resumo: "Materiais de revisão e conscientização contínua.", 
+        folderFrente: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770860071/FOLDER_rev1_page-0001_xixvea.jpg", 
+        folderVerso: "https://res.cloudinary.com/dxnruvmgu/image/upload/v1770860083/FOLDER_rev1_page-0002_klmmgk.jpg" 
+    },
+    ABRIL: { titulo: "", resumo: "", folderFrente: "" },
+    MAIO: { titulo: "", resumo: "", folderFrente: "" },
+    JULHO: { titulo: "", resumo: "", folderFrente: "" },
+    SETEMBRO: { titulo: "", resumo: "", folderFrente: "" },
+    DEZEMBRO: { titulo: "", resumo: "", folderFrente: "" }
+};
+
+function abrirCampanha(mes) {
+    const dados = campanhas[mes];
+    const grid = document.getElementById("recursosGrid");
+    
+    document.getElementById("tituloCampanha").innerText = dados.titulo ? `${mes} - ${dados.titulo}` : mes;
+    document.getElementById("resumoCampanha").innerText = dados.resumo || "Resumo não informado para esta campanha.";
+    
+    grid.innerHTML = "";
+
+    const tiposRecursos = [
+        { chave: 'folderFrente', nome: 'Folder Frente' },
+        { chave: 'folderVerso', nome: 'Folder Verso' },
+        { chave: 'banner', nome: 'Banner' },
+        { chave: 'brinde', nome: 'Brinde / Material' },
+        { chave: 'faixa', nome: 'Faixa de Pátio' }
+    ];
+
+    let temRecurso = false;
+
+    tiposRecursos.forEach(item => {
+        const url = dados[item.chave];
+        if (url && url.trim() !== "") {
+            temRecurso = true;
+            grid.innerHTML += `
+                <div class="card-recurso">
+                    <h4>${item.nome}</h4>
+                    <img src="${url}" alt="${item.nome}" onclick="abrirZoom('${url}')">
+                </div>`;
+        }
+    });
+
+    if (!temRecurso) {
+        grid.innerHTML = `<p class="nao-utilizado">⚠️ Nenhum material visual cadastrado para ${mes}.</p>`;
+    }
+
+    document.getElementById("modalCampanha").style.display = "flex";
+}
+
+function fecharCampanha() {
+    document.getElementById("modalCampanha").style.display = "none";
+}
+
+function abrirZoom(url) {
+    document.getElementById("imagemZoom").src = url;
+    document.getElementById("modalZoom").style.display = "flex";
+}
+
+function fecharZoom() {
+    document.getElementById("modalZoom").style.display = "none";
+}
+
+// Lógica de Status
+const mesAtualIdx = new Date().getMonth();
+const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+document.getElementById("mesAtualTexto").innerText = "Mês Atual: " + nomesMeses[mesAtualIdx];
+
+document.querySelectorAll(".card").forEach(card => {
+    const mesCard = parseInt(card.getAttribute("data-month"));
+    const statusLabel = card.querySelector(".status");
+
+    if (mesCard === mesAtualIdx) {
+        card.classList.add("andamento");
+        statusLabel.innerText = "Em andamento";
+    } else if (mesCard < mesAtualIdx) {
+        card.classList.add("concluida");
+        statusLabel.innerText = "Concluída";
+    } else {
+        card.classList.add("pendente");
+        statusLabel.innerText = "Pendente";
+    }
+});
+
+window.onclick = function(event) {
+    if (event.target == document.getElementById("modalCampanha")) fecharCampanha();
+}
+</script>
+
+</body>
+</html>
